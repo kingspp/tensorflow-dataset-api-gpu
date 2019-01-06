@@ -178,7 +178,8 @@ class ConsolidatedReport(object):
                     if its['name'] == 'MEMCPYDtoH' and its['cat'] == 'Op':
                         _memcpy_d2h_times.append(its['dur'])
 
-        self.average_iterator_get_next_time = humanize_time_delta(mean(_iterator_get_next_times) / 10 ** 6)
+        if len(_iterator_get_next_times) > 0:
+            self.average_iterator_get_next_time = humanize_time_delta(mean(_iterator_get_next_times) / 10 ** 6)
         if not config['session_config']['gpu_devices'] == '' and 'gpu_monitor' in normal_profile[
             'device_statistics'] and not 'error' in normal_profile['device_statistics'][
             'gpu_monitor']:
