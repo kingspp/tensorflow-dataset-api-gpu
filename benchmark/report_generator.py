@@ -50,7 +50,7 @@ class ConsolidatedReport(object):
         self.prefetch_to_device = config['prefetch_to_device']
         self.model_size_analytical = normal_run['model_analytical_memory']
         self.elapsed_time = humanize_time_delta(normal_profile['total_elapsed_time (secs)'])
-        if 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
+        if not config['session_config']['gpu_devices']=='' and  'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
             'gpu_monitor']:
             self.max_gpu_memory_consumption = \
                 normal_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
@@ -72,7 +72,7 @@ class ConsolidatedReport(object):
         self.max_cpu_utilization = normal_profile['device_statistics']['cpu_monitor']['max_cpu_usage (%)']
         self.max_memory_utilization = normal_profile['device_statistics']['memory_monitor']['max_memory_usage (MB)']
 
-        if 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics']['gpu_monitor']:
+        if not config['session_config']['gpu_devices']=='' and 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics']['gpu_monitor']:
             self.gpu_stats = None
             self.total_gpu_memory = normal_profile['device_statistics']['gpu_monitor']['gpu_total_memory (in MiB)'][
                 GPU_DEVICES[config['session_config']['gpu_devices']]]
@@ -132,7 +132,7 @@ class ConsolidatedReport(object):
                         _memcpy_d2h_times.append(its['dur'])
 
         self.average_iterator_get_next_time = humanize_time_delta(mean(_iterator_get_next_times)/10**6)
-        if 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
+        if not config['session_config']['gpu_devices']=='' and 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
             'gpu_monitor']:
             self.average_memcpyd2h_time = humanize_time_delta(mean(_memcpy_d2h_times)/10**6)
             self.average_memcpyh2d_time = humanize_time_delta(mean(_memcpy_h2d_times)/10**6)

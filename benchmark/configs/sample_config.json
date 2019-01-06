@@ -16,7 +16,6 @@
     ]
   },
   "session_config": {
-    "gpu_enabled":true,
     "gpu_devices":"0",
     "allow_growth": true,
     "log_device_placement": false,
