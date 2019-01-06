@@ -29,6 +29,12 @@ except Exception:
     print('Provide config file path and runner type')
     exit(1)
 
+GPU_DEVICES = {
+    '0': 'GPU-7da3f67f-ef6f-e43d-2433-ae178b12001d',
+    '1': 'GPU-86fde21a-eb59-b7d8-dace-88f81a1cb2ea',
+    '0,1': 'GPU-7da3f67f-ef6f-e43d-2433-ae178b12001d',
+}
+
 
 class ConsolidatedReport(object):
     def __init__(self, config, normal_run, profiled_run, separate_run, normal_profile, profiled_profile,
@@ -36,7 +42,7 @@ class ConsolidatedReport(object):
         """
         Primary View
         """
-        self.input_data_size = config['input_size']
+        self.input_data_size = config['input_dimensions']
         self.epoch = config['epoch']
         self.steps_per_epoch = config['steps']
         self.batch_size = config['batch_size']
@@ -44,10 +50,12 @@ class ConsolidatedReport(object):
         self.prefetch_to_device = config['prefetch_to_device']
         self.model_size_analytical = normal_run['model_analytical_memory']
         self.elapsed_time = humanize_time_delta(normal_profile['total_elapsed_time (secs)'])
-        self.max_gpu_memory_consumption = normal_profile['device_statistics']['gpu_monitor'][
-            'max_memory_usage'] if 'gpu_monitor' in normal_profile['device_statistics'] else None
-        self.max_gpu_memory_utilization = normal_profile['device_statistics']['gpu_monitor'][
-            'max_gpu_usage'] if 'gpu_monitor' in normal_profile['device_statistics'] else None
+        if 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
+            'gpu_monitor']:
+            self.max_gpu_memory_consumption = normal_profile['device_statistics']['gpu_monitor'][
+                'max_memory_usage'] if 'gpu_monitor' in normal_profile['device_statistics'] else None
+            self.max_gpu_memory_utilization = normal_profile['device_statistics']['gpu_monitor'][
+                'max_gpu_usage'] if 'gpu_monitor' in normal_profile['device_statistics'] else None
         self.max_cpu_utilization = normal_profile['device_statistics']['cpu_monitor']['max_cpu_usage (%)']
         self.max_memory_utilization = normal_profile['device_statistics']['memory_monitor']['max_memory_usage (MB)']
         self.activation_parameters = normal_run['activation_parameters']
@@ -60,13 +68,23 @@ class ConsolidatedReport(object):
         self.total_available_memory = normal_profile['device_statistics']['memory_monitor']['total_memory (GB)']
         self.cpu_cores = normal_profile['device_statistics']['cpu_monitor']['cpu_cores']
         self.cpu_logic_threads = normal_profile['device_statistics']['cpu_monitor']['cpu_threads']
-        self.gpu_stats = None
-        self.max_gpu_memory_consumption = normal_profile['device_statistics']['gpu_monitor'][
-            'max_memory_usage'] if 'gpu_monitor' in normal_profile['device_statistics'] else None
-        self.max_gpu_memory_utilization = normal_profile['device_statistics']['gpu_monitor'][
-            'max_gpu_usage'] if 'gpu_monitor' in normal_profile['device_statistics'] else None
         self.max_cpu_utilization = normal_profile['device_statistics']['cpu_monitor']['max_cpu_usage (%)']
         self.max_memory_utilization = normal_profile['device_statistics']['memory_monitor']['max_memory_usage (MB)']
+
+        if 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics']['gpu_monitor']:
+            self.gpu_stats = None
+            self.total_gpu_memory = normal_profile['device_statistics']['gpu_monitor']['gpu_total_memory (in MiB)'][
+                GPU_DEVICES[config['gpu']]]
+            self.gpu_power_limit = normal_profile['device_statistics']['gpu_monitor']['gpu_power_limit (in Watt)'][
+                GPU_DEVICES[config['gpu']]]
+            self.max_gpu_memory_consumption = \
+                normal_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
+                    GPU_DEVICES[config['gpu']]]
+            self.max_gpu_utilization = normal_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
+                GPU_DEVICES[config['gpu']]]
+            self.gpu_max_power_drawn = \
+                normal_profile['device_statistics']['gpu_monitor']['gpu_max_power_drawn (in Watt)'][
+                    GPU_DEVICES[config['gpu']]]
 
         """
         Time Statistics        
@@ -85,6 +103,12 @@ class ConsolidatedReport(object):
         self.average_compute_gradient_time = humanize_time_delta(separate_run['average_compute_gradient_time'])
         self.average_apply_gradients_time = humanize_time_delta(separate_run['average_apply_gradients_time'])
         self.average_iterator_get_next_time = None
+        self.average_memcpyd2h_time = None
+        self.average_memcpyh2d_time = None
+        self.total_memcpy_d2h_calls = None
+        self.total_memcpy_h2d_calls = None
+        self.memcpy_d2h_calls_per_step = None
+        self.memcpy_h2d_calls_per_step = None
 
         """
         Memory Statistics
@@ -93,22 +117,39 @@ class ConsolidatedReport(object):
         self.model_memory_consumption = normal_run['model_creation_memory']
         self.runner_memory_consumption = normal_run['runner_memory_consumption']
 
-    def fetch_details_from_timelines(self, timeline_dir='/private/tmp/time_dirs/sample_config/timeline/'):
-        _iterator_get_next_times = []
+    def fetch_details_from_timelines(self, timeline_dir):
+        _iterator_get_next_times, _memcpy_d2h_times, _memcpy_h2d_times = [], [], []
         for root, dirs, files in os.walk(timeline_dir):
             for f in files:
                 d = json.load(open(timeline_dir + f))
                 for its in d['traceEvents']:
                     if its['name'] == 'IteratorGetNext' and its['cat'] == 'Op':
                         _iterator_get_next_times.append(its['dur'])
+                    if its['name'] == 'MEMCPYHtoD' and its['cat'] == 'Op':
+                        _memcpy_h2d_times.append(its['dur'])
+                    if its['name'] == 'MEMCPYDtoH' and its['cat'] == 'Op':
+                        _memcpy_d2h_times.append(its['dur'])
+
         self.average_iterator_get_next_time = mean(_iterator_get_next_times)
 
+        if 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
+            'gpu_monitor']:
+            self.average_memcpyd2h_time = mean(_memcpy_d2h_times)
+            self.average_memcpyh2d_time = mean(_memcpy_h2d_times)
+            self.total_memcpy_d2h_calls = len(_memcpy_d2h_times)
+            self.total_memcpy_h2d_calls = len(_memcpy_h2d_times)
+            self.memcpy_d2h_calls_per_step = len(_memcpy_d2h_times) / config['epochs'] * config['steps']
+            self.memcpy_h2d_calls_per_step = len(_memcpy_h2d_times) / config['epochs'] * config['steps']
+        return self
 
-    # Device
-    # to
-    # Host(Mem
-    # Copy)
-    # Host
-    # to
-    # Device(Mem
-    # Copy)
+
+json.dump(ConsolidatedReport(
+    config=config,
+    normal_run=normal_run_report,
+    profiled_run=profiled_run_report,
+    separate_run=separate_run_report,
+    normal_profile=normal_profile,
+    profiled_profile=profiled_profile,
+    separate_profile=separate_profile
+).fetch_details_from_timelines(timeline_dir=config['save_path'] + '/timeline/').__dict__,
+          open(config['save_path'] + '/consolidated_report.json', 'w'), indent=2)

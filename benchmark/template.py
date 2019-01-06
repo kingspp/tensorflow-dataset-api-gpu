@@ -22,8 +22,17 @@ import json
 import sys
 import os
 
+
+
 try:
     config = json.load(open(sys.argv[1]))
+
+    # GPU Control
+    if config['session_config']['gpu_enabled']:
+        os.environ['CUDA_VISIBLE_DEVICES'] = config['session_config']['gpu_device']
+    else:
+        os.environ['CUDA_VISIBLE_DEVICES'] = ''
+
     config['name'] = sys.argv[1].split('/')[-1].split('.')[0]
     config['save_path'] += '/' + config['name'] + '/'
     os.system('mkdir -p {}'.format(config['save_path']))
