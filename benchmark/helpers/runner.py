@@ -158,5 +158,5 @@ def profiled_runner(session_config, dataset_iterator, epoch, fetch_ops):
         except tf.errors.OutOfRangeError:
             print(f'Epoch {i} completed . . .')
             sess.run(dataset_iterator.initializer)
-    with open('/tmp/pctx1', 'wb') as f:
+    with open('{}/complete_profile.pctx'.format(REPORT.config['save_path']), 'wb') as f:
         f.write(profiler.serialize_to_string())
