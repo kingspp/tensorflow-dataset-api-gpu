@@ -52,10 +52,11 @@ class ConsolidatedReport(object):
         self.elapsed_time = humanize_time_delta(normal_profile['total_elapsed_time (secs)'])
         if 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
             'gpu_monitor']:
-            self.max_gpu_memory_consumption = normal_profile['device_statistics']['gpu_monitor'][
-                'max_memory_usage'] if 'gpu_monitor' in normal_profile['device_statistics'] else None
-            self.max_gpu_memory_utilization = normal_profile['device_statistics']['gpu_monitor'][
-                'max_gpu_usage'] if 'gpu_monitor' in normal_profile['device_statistics'] else None
+            self.max_gpu_memory_consumption = \
+                normal_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
+                    GPU_DEVICES[config['gpu']]]
+            self.max_gpu_utilization = normal_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
+                GPU_DEVICES[config['gpu']]]
         self.max_cpu_utilization = normal_profile['device_statistics']['cpu_monitor']['max_cpu_usage (%)']
         self.max_memory_utilization = normal_profile['device_statistics']['memory_monitor']['max_memory_usage (MB)']
         self.activation_parameters = normal_run['activation_parameters']
