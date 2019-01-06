@@ -101,7 +101,7 @@ def prop_based_runner(session_config, dataset_iterator, epoch, fetch_ops):
     REPORT.dataset_iterator_init_end_time = time.time()
 
     compute_op, apply_op, placeholder_gradients, loss = fetch_ops
-    for i in tqdm(range(epoch * 2)):
+    for i in tqdm(range(5)):
         try:
             while True:
                 _start = time.time()
@@ -144,7 +144,7 @@ def profiled_runner(session_config, dataset_iterator, epoch, fetch_ops):
     profiler = tf.contrib.tfprof.model_analyzer.Profiler(sess.graph)
     options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
     run_metadata = tf.RunMetadata()
-    for i in tqdm(range(epoch)):
+    for i in tqdm(range(5)):
         try:
             while True:
                 _start = time.time()
