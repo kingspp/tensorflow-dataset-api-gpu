@@ -50,7 +50,8 @@ class ConsolidatedReport(object):
         self.prefetch_to_device = config['prefetch_to_device']
         self.model_size_analytical = normal_run['model_analytical_memory']
         self.elapsed_time = humanize_time_delta(normal_profile['total_elapsed_time (secs)'])
-        if not config['session_config']['gpu_devices']=='' and  'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
+        if not config['session_config']['gpu_devices'] == '' and 'gpu_monitor' in normal_profile[
+            'device_statistics'] and not 'error' in normal_profile['device_statistics'][
             'gpu_monitor']:
             self.max_gpu_memory_consumption = \
                 normal_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
@@ -69,11 +70,23 @@ class ConsolidatedReport(object):
         self.total_available_memory = normal_profile['device_statistics']['memory_monitor']['total_memory (GB)']
         self.cpu_cores = normal_profile['device_statistics']['cpu_monitor']['cpu_cores']
         self.cpu_logic_threads = normal_profile['device_statistics']['cpu_monitor']['cpu_threads']
+
         self.max_cpu_utilization = normal_profile['device_statistics']['cpu_monitor']['max_cpu_usage (%)']
         self.max_memory_utilization = normal_profile['device_statistics']['memory_monitor']['max_memory_usage (MB)']
 
-        if not config['session_config']['gpu_devices']=='' and 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics']['gpu_monitor']:
+        self.max_cpu_utilization_profile = profiled_profile['device_statistics']['cpu_monitor']['max_cpu_usage (%)']
+        self.max_memory_utilization_profile = profiled_profile['device_statistics']['memory_monitor'][
+            'max_memory_usage (MB)']
+
+        self.max_cpu_utilization_separate = separate_profile['device_statistics']['cpu_monitor']['max_cpu_usage (%)']
+        self.max_memory_utilization_separate = separate_profile['device_statistics']['memory_monitor'][
+            'max_memory_usage (MB)']
+
+        if not config['session_config']['gpu_devices'] == '' and 'gpu_monitor' in normal_profile[
+            'device_statistics'] and not 'error' in normal_profile['device_statistics']['gpu_monitor']:
             self.gpu_stats = None
+
+            # Normal Run
             self.total_gpu_memory = normal_profile['device_statistics']['gpu_monitor']['gpu_total_memory (in MiB)'][
                 GPU_DEVICES[config['session_config']['gpu_devices']]]
             self.gpu_power_limit = normal_profile['device_statistics']['gpu_monitor']['gpu_power_limit (in Watt)'][
@@ -87,9 +100,44 @@ class ConsolidatedReport(object):
                 normal_profile['device_statistics']['gpu_monitor']['gpu_max_power_drawn (in Watt)'][
                     GPU_DEVICES[config['session_config']['gpu_devices']]]
 
+            # Profiled Run
+            self.total_gpu_memory_profiled = \
+            profiled_profile['device_statistics']['gpu_monitor']['gpu_total_memory (in MiB)'][
+                GPU_DEVICES[config['session_config']['gpu_devices']]]
+            self.gpu_power_limit_profiled = \
+            profiled_profile['device_statistics']['gpu_monitor']['gpu_power_limit (in Watt)'][
+                GPU_DEVICES[config['session_config']['gpu_devices']]]
+            self.max_gpu_memory_consumption_profiled = \
+                profiled_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
+                    GPU_DEVICES[config['session_config']['gpu_devices']]]
+            self.max_gpu_utilization_profiled = \
+            profiled_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
+                GPU_DEVICES[config['session_config']['gpu_devices']]]
+            self.gpu_max_power_drawn_profiled = \
+                profiled_profile['device_statistics']['gpu_monitor']['gpu_max_power_drawn (in Watt)'][
+                    GPU_DEVICES[config['session_config']['gpu_devices']]]
+
+            # Separate Run
+            self.total_gpu_memory_separate = \
+            separate_profile['device_statistics']['gpu_monitor']['gpu_total_memory (in MiB)'][
+                GPU_DEVICES[config['session_config']['gpu_devices']]]
+            self.gpu_power_limit_separate = \
+            separate_profile['device_statistics']['gpu_monitor']['gpu_power_limit (in Watt)'][
+                GPU_DEVICES[config['session_config']['gpu_devices']]]
+            self.max_gpu_memory_consumption_separate = \
+                separate_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
+                    GPU_DEVICES[config['session_config']['gpu_devices']]]
+            self.max_gpu_utilization_separate = \
+            separate_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
+                GPU_DEVICES[config['session_config']['gpu_devices']]]
+            self.gpu_max_power_drawn_separate = \
+                separate_profile['device_statistics']['gpu_monitor']['gpu_max_power_drawn (in Watt)'][
+                    GPU_DEVICES[config['session_config']['gpu_devices']]]
+
         """
         Time Statistics        
         """
+        # Normal run
         self.elapsed_time = humanize_time_delta(normal_profile['total_elapsed_time (secs)'])
         self.model_creation_time = humanize_time_delta(normal_run['model_creation_time'])
         self.runner_elapsed_time = humanize_time_delta(normal_run['runner_elapsed_time'])
@@ -111,6 +159,26 @@ class ConsolidatedReport(object):
         self.memcpy_d2h_calls_per_step = None
         self.memcpy_h2d_calls_per_step = None
 
+        # Profiled Run
+        self.elapsed_time_profiled = humanize_time_delta(profiled_profile['total_elapsed_time (secs)'])
+        self.model_creation_time_profiled = humanize_time_delta(profiled_profile['model_creation_time'])
+        self.runner_elapsed_time_profiled = humanize_time_delta(profiled_profile['runner_elapsed_time'])
+        self.session_creation_elapsed_time_profiled = humanize_time_delta(
+            profiled_profile['session_creation_elapsed_time'])
+        self.session_init_elapsed_time_profiled = humanize_time_delta(profiled_profile['session_init_elapsed_time'])
+        self.dataset_iterator_init_elapsed_time_profiled = humanize_time_delta(
+            profiled_profile['dataset_iterator_init_elapsed_time'])
+
+        # Separate Run
+        self.elapsed_time_separate = humanize_time_delta(separate_profile['total_elapsed_time (secs)'])
+        self.model_creation_time_separate = humanize_time_delta(separate_profile['model_creation_time'])
+        self.runner_elapsed_time_separate = humanize_time_delta(separate_profile['runner_elapsed_time'])
+        self.session_creation_elapsed_time_separate = humanize_time_delta(
+            separate_profile['session_creation_elapsed_time'])
+        self.session_init_elapsed_time_separate = humanize_time_delta(separate_profile['session_init_elapsed_time'])
+        self.dataset_iterator_init_elapsed_time_separate = humanize_time_delta(
+            separate_profile['dataset_iterator_init_elapsed_time'])
+
         """
         Memory Statistics
         """
@@ -131,11 +199,12 @@ class ConsolidatedReport(object):
                     if its['name'] == 'MEMCPYDtoH' and its['cat'] == 'Op':
                         _memcpy_d2h_times.append(its['dur'])
 
-        self.average_iterator_get_next_time = humanize_time_delta(mean(_iterator_get_next_times)/10**6)
-        if not config['session_config']['gpu_devices']=='' and 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
+        self.average_iterator_get_next_time = humanize_time_delta(mean(_iterator_get_next_times) / 10 ** 6)
+        if not config['session_config']['gpu_devices'] == '' and 'gpu_monitor' in normal_profile[
+            'device_statistics'] and not 'error' in normal_profile['device_statistics'][
             'gpu_monitor']:
-            self.average_memcpyd2h_time = humanize_time_delta(mean(_memcpy_d2h_times)/10**6)
-            self.average_memcpyh2d_time = humanize_time_delta(mean(_memcpy_h2d_times)/10**6)
+            self.average_memcpyd2h_time = humanize_time_delta(mean(_memcpy_d2h_times) / 10 ** 6)
+            self.average_memcpyh2d_time = humanize_time_delta(mean(_memcpy_h2d_times) / 10 ** 6)
             self.total_memcpy_d2h_calls = len(_memcpy_d2h_times)
             self.total_memcpy_h2d_calls = len(_memcpy_h2d_times)
             self.memcpy_d2h_calls_per_step = len(_memcpy_d2h_times) / (config['epoch'] * config['steps'])
