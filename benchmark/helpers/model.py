@@ -64,9 +64,10 @@ def model_monitor(f, always: bool = False):
             r = f(*args, **kwargs)
             REPORT.model_end_time = time.time()
             REPORT.model_end_memory = REPORT.process.memory_info().rss // 10 ** 6
-            REPORT.variable_parameters = sum([reduce(operator.mul, t.get_shape().as_list() if len(t.get_shape().as_list())>1 else [0]) for t in
-                                              tf.get_default_graph().get_collection(
-                                                  tf.GraphKeys.GLOBAL_VARIABLES)])
+            REPORT.variable_parameters = sum(
+                [reduce(operator.mul, t.get_shape().as_list() if len(t.get_shape().as_list()) > 1 else [0]) for t in
+                 tf.get_default_graph().get_collection(
+                     tf.GraphKeys.GLOBAL_VARIABLES)])
             REPORT.model_analytical_memory += get_param_size(REPORT.activation_parameters) * 2
             REPORT.model_analytical_memory += get_param_size(REPORT.variable_parameters) * 3
             print('Model Created Successfully!')
@@ -86,6 +87,7 @@ def create_fetch_ops(f_type, optimizer: tf.train.Optimizer, loss):
         return compute_op, apply_op, placeholder_gradients, loss
     else:
         return optimizer.minimize(loss), loss
+
 
 @model_monitor
 def mnist_model_birnn(features, target, optimizer: str, num_hidden: int = 128, num_classes=10,
@@ -115,17 +117,21 @@ def mnist_model_birnn(features, target, optimizer: str, num_hidden: int = 128, n
     optimizer = optimizer_mapper(optimizer)(learning_rate=0.01)
     return create_fetch_ops(optimizer=optimizer, loss=loss_op, f_type=f_type)
 
+
 @model_monitor
 def mnist_model_cnn(features, target, optimizer: str, f_type=''):
-    x = tf.layers.conv2d(inputs=features, filters=30, kernel_size=(5, 5), activation=tf.nn.relu)
-    x = tf.layers.max_pooling2d(inputs=x, pool_size=(2, 2), strides=(2, 2))
-    x = tf.layers.conv2d(inputs=x, filters=15, kernel_size=(3, 3), activation=tf.nn.relu)
-    x = tf.layers.max_pooling2d(inputs=x, pool_size=(2, 2), strides=(2, 2))
-    x = tf.layers.dropout(inputs=x, rate=0.2)
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(inputs=x, units=128, activation=tf.nn.relu)
-    x = tf.layers.dense(inputs=x, units=50, activation=tf.nn.relu)
-    x = tf.layers.dense(inputs=x, units=10, activation=tf.nn.softmax)
+    features = update_activation_parameters(features)
+    target = update_activation_parameters(target)
+    x = update_activation_parameters(
+        tf.layers.conv2d(inputs=features, filters=30, kernel_size=(5, 5), activation=tf.nn.relu))
+    x = update_activation_parameters(tf.layers.max_pooling2d(inputs=x, pool_size=(2, 2), strides=(2, 2)))
+    x = update_activation_parameters(tf.layers.conv2d(inputs=x, filters=15, kernel_size=(3, 3), activation=tf.nn.relu))
+    x = update_activation_parameters(tf.layers.max_pooling2d(inputs=x, pool_size=(2, 2), strides=(2, 2)))
+    x = update_activation_parameters(tf.layers.dropout(inputs=x, rate=0.2))
+    x = update_activation_parameters(tf.layers.flatten(x))
+    x = update_activation_parameters(tf.layers.dense(inputs=x, units=128, activation=tf.nn.relu))
+    x = update_activation_parameters(tf.layers.dense(inputs=x, units=50, activation=tf.nn.relu))
+    x = update_activation_parameters(tf.layers.dense(inputs=x, units=10, activation=tf.nn.softmax))
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=x, labels=target))
     optimizer = optimizer_mapper(optimizer)(learning_rate=0.01)
     return create_fetch_ops(optimizer=optimizer, loss=loss_op, f_type=f_type)
