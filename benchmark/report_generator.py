@@ -160,7 +160,7 @@ class ConsolidatedReport(object):
         self.memcpy_h2d_calls_per_step = None
 
         # Profiled Run
-        self.elapsed_time_profiled = humanize_time_delta(profiled_run['total_elapsed_time (secs)'])
+        self.elapsed_time_profiled = humanize_time_delta(profiled_profile['total_elapsed_time (secs)'])
         self.model_creation_time_profiled = humanize_time_delta(profiled_run['model_creation_time'])
         self.runner_elapsed_time_profiled = humanize_time_delta(profiled_run['runner_elapsed_time'])
         self.session_creation_elapsed_time_profiled = humanize_time_delta(
@@ -170,7 +170,7 @@ class ConsolidatedReport(object):
             profiled_run['dataset_iterator_init_elapsed_time'])
 
         # Separate Run
-        self.elapsed_time_separate = humanize_time_delta(separate_run['total_elapsed_time (secs)'])
+        self.elapsed_time_separate = humanize_time_delta(separate_profile['total_elapsed_time (secs)'])
         self.model_creation_time_separate = humanize_time_delta(separate_run['model_creation_time'])
         self.runner_elapsed_time_separate = humanize_time_delta(separate_run['runner_elapsed_time'])
         self.session_creation_elapsed_time_separate = humanize_time_delta(
