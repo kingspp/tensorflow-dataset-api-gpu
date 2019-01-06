@@ -13,6 +13,7 @@
 
 from pmark import pmonitor
 from pmark.writers import JSONWriter
+from pmark.monitors import CPUMonitor, GPUMonitor, MemoryMonitor
 from benchmark.helpers.model import *
 from benchmark.helpers.data import *
 from benchmark.helpers.runner import *
@@ -33,7 +34,8 @@ except Exception:
     exit(1)
 
 
-@pmonitor(f=None, writers=[JSONWriter(save_path=config['save_path'], file_name='normal_run.json')])
+@pmonitor(f=None, monitors=[CPUMonitor, GPUMonitor, MemoryMonitor],
+          writers=[JSONWriter(save_path=config['save_path'], file_name='normal_run.json')])
 def normal_run(config):
     REPORT.config = config
     iterator, features, target = dataset_generator_inmem(batch_size=config['batch_size'], steps=config['steps'],
@@ -52,7 +54,8 @@ def normal_run(config):
     json.dump(REPORT.__dict__, open(config['save_path'] + '/normal_run_report.json', 'w'), indent=2)
 
 
-@pmonitor(f=None, writers=[JSONWriter(save_path=config['save_path'], file_name='profiled.json')])
+@pmonitor(f=None, monitors=[CPUMonitor, GPUMonitor, MemoryMonitor],
+          writers=[JSONWriter(save_path=config['save_path'], file_name='profiled_run.json')])
 def profiled_run(config):
     REPORT.config = config
     iterator, features, target = dataset_generator_inmem(batch_size=config['batch_size'], steps=config['steps'],
@@ -71,7 +74,8 @@ def profiled_run(config):
     json.dump(REPORT.__dict__, open(config['save_path'] + '/profiled_run_report.json', 'w'), indent=2)
 
 
-@pmonitor(f=None, writers=[JSONWriter(save_path=config['save_path'], file_name='separate_run.json')])
+@pmonitor(f=None, monitors=[CPUMonitor, GPUMonitor, MemoryMonitor],
+          writers=[JSONWriter(save_path=config['save_path'], file_name='separate_run.json')])
 def separate_run(config):
     REPORT.config = config
     iterator, features, target = dataset_generator_inmem(batch_size=config['batch_size'], steps=config['steps'],
