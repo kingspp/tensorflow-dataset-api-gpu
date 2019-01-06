@@ -5,7 +5,7 @@
   "steps": 2,
   "optimizer": "sgd",
   "prefetch": 10,
-  "prefetch_to_device": null,
+  "prefetch_to_device": "GPU:0",
   "model": "mnist_rnn",
   "input_dimensions": {
     "features": [

@@ -35,7 +35,7 @@ def dataset_generator_inmem(batch_size, steps, prefetch=None, prefetch_to_device
 
     if prefetch and prefetch_to_device:
         dataset = dataset.apply(
-            tf.contrib.data.prefetch_to_device(prefetch, prefetch))
+            tf.contrib.data.prefetch_to_device(prefetch_to_device, prefetch))
     elif prefetch:
         dataset = dataset.prefetch(prefetch)
     elif prefetch_to_device:
