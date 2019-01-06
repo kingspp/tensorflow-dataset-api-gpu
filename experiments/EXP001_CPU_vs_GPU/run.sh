@@ -3,7 +3,7 @@
 echo "##################################################################################################"
 echo "###           Running RNN Experiments                                                           ##"
 echo "##################################################################################################"
-export PYTHONPATH=/Users/prathyushsp/Git/tensorflow-dataset-api-gpu:/home/prathyush.sp/Git/tensorflow-dataset-api-gpu
+export PYTHONPATH=$PYTHONPATH:/Users/prathyushsp/Git/tensorflow-dataset-api-gpu:/home/prathyush.sp/Git/tensorflow-dataset-api-gpu
 
 python3.6 ./../../benchmark/template.py ./mnist_rnn_config_cpu.json normal | tee mnist_rnn_config_cpu.json.log
 #python3.6 ./../../../benchmark/template.py ./mnist_rnn_config_cpu.json profiled | tee mnist
