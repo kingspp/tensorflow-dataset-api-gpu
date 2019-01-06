@@ -1,0 +1,23 @@
+{
+  "save_path": "/tmp/time_dirs/",
+  "epoch": 10,
+  "batch_size": 32,
+  "steps": 10,
+  "optimizer": "sgd",
+  "prefetch": 10,
+  "prefetch_to_device": null,
+  "model": "mnist_ffn",
+  "input_dimensions": {
+    "features": [
+      784
+    ],
+    "labels": [
+      10
+    ]
+  },
+  "session_config": {
+    "allow_growth": true,
+    "log_device_placement": false,
+    "allow_soft_placement": true
+  }
+}
