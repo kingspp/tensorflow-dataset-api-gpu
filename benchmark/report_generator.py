@@ -103,6 +103,7 @@ class ConsolidatedReport(object):
                         _iterator_get_next_times.append(its['dur'])
         self.average_iterator_get_next_time = mean(_iterator_get_next_times)
 
+
     # Device
     # to
     # Host(Mem
