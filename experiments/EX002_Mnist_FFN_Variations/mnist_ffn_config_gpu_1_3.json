@@ -1,0 +1,24 @@
+{
+  "save_path": "/tmp/time_dirs/mnist_ffn_variations/",
+  "epoch": 25,
+  "batch_size": 1024,
+  "steps": 20,
+  "optimizer": "adam",
+  "prefetch": 25,
+  "prefetch_to_device": null,
+  "model": "mnist_ffn",
+  "input_dimensions": {
+    "features": [
+      784
+    ],
+    "labels": [
+      10
+    ]
+  },
+  "session_config": {
+    "gpu_devices":"0",
+    "allow_growth": true,
+    "log_device_placement": true,
+    "allow_soft_placement": false
+  }
+}
