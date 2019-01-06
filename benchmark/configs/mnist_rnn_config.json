@@ -2,14 +2,14 @@
   "save_path": "/tmp/time_dirs/",
   "epoch": 1,
   "batch_size": 32,
-  "steps": 10,
+  "steps": 2,
   "optimizer": "sgd",
   "prefetch": 10,
   "prefetch_to_device": null,
   "model": "mnist_rnn",
   "input_dimensions": {
     "features": [
-      10, 10
+      100, 100
     ],
     "labels": [
       10

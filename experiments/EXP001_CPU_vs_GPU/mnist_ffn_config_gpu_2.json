@@ -1,8 +1,8 @@
 {
   "save_path": "/tmp/time_dirs/cpu_vs_gpu/",
-  "epoch": 10,
+  "epoch": 5,
   "batch_size": 32,
-  "steps": 10,
+  "steps": 5,
   "optimizer": "adam",
   "prefetch": 10,
   "prefetch_to_device": null,

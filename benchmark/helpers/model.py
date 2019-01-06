@@ -90,7 +90,7 @@ def create_fetch_ops(f_type, optimizer: tf.train.Optimizer, loss):
 
 
 @model_monitor
-def mnist_model_birnn(features, target, optimizer: str, num_hidden: int = 128, num_classes=10,
+def mnist_model_birnn(features, target, optimizer: str, num_hidden: int = 1024, num_classes=10,
                       f_type=''):
     features = update_activation_parameters(features)
     target = update_activation_parameters(target)
