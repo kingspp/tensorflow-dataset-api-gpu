@@ -29,7 +29,7 @@ try:
 
     # GPU Control
     if config['session_config']['gpu_enabled']:
-        os.environ['CUDA_VISIBLE_DEVICES'] = config['session_config']['gpu_device']
+        os.environ['CUDA_VISIBLE_DEVICES'] = config['session_config']['gpu_devices']
     else:
         os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
