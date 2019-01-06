@@ -139,8 +139,8 @@ class ConsolidatedReport(object):
             self.average_memcpyh2d_time = mean(_memcpy_h2d_times)
             self.total_memcpy_d2h_calls = len(_memcpy_d2h_times)
             self.total_memcpy_h2d_calls = len(_memcpy_h2d_times)
-            self.memcpy_d2h_calls_per_step = len(_memcpy_d2h_times) / config['epoch'] * config['steps']
-            self.memcpy_h2d_calls_per_step = len(_memcpy_h2d_times) / config['epoch'] * config['steps']
+            self.memcpy_d2h_calls_per_step = len(_memcpy_d2h_times) / (config['epoch'] * config['steps'])
+            self.memcpy_h2d_calls_per_step = len(_memcpy_h2d_times) / (config['epoch'] * config['steps'])
         return self
 
 
