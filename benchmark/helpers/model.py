@@ -87,8 +87,11 @@ def create_fetch_ops(f_type, optimizer: tf.train.Optimizer, loss):
     else:
         return optimizer.minimize(loss), loss
 
-
-def mnist_model_birnn(features, target, timesteps: int = 28, num_hidden: int = 128, num_classes=10):
+@model_monitor
+def mnist_model_birnn(features, target, optimizer: str, num_hidden: int = 128, num_classes=10,
+                      f_type=''):
+    features = update_activation_parameters(features)
+    target = update_activation_parameters(target)
     weights = {
         'out': tf.Variable(tf.random_normal([2 * num_hidden, num_classes]))
     }
@@ -96,24 +99,24 @@ def mnist_model_birnn(features, target, timesteps: int = 28, num_hidden: int = 1
         'out': tf.Variable(tf.random_normal([num_classes]))
     }
 
-    x = tf.unstack(features, timesteps, 1)
+    x = [update_activation_parameters(i) for i in tf.unstack(features, features.get_shape()[1], 1)]
     lstm_fw_cell = rnn.BasicLSTMCell(num_hidden, forget_bias=1.0)
     lstm_bw_cell = rnn.BasicLSTMCell(num_hidden, forget_bias=1.0)
     try:
         outputs, _, _ = rnn.static_bidirectional_rnn(lstm_fw_cell, lstm_bw_cell, x,
                                                      dtype=tf.float32)
+        outputs = [update_activation_parameters(i) for i in outputs]
     except Exception:  # Old TensorFlow version only returns outputs not states
         outputs = rnn.static_bidirectional_rnn(lstm_fw_cell, lstm_bw_cell, x,
                                                dtype=tf.float32)
-    logits = tf.matmul(outputs[-1], weights['out']) + biases['out']
-    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-        logits=logits, labels=target))
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
-    train_op = optimizer.minimize(loss_op)
-    return train_op, loss_op
+        outputs[-1] = update_activation_parameters(outputs[-1])
+    logits = update_activation_parameters(tf.matmul(outputs[-1], weights['out']) + biases['out'])
+    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=target))
+    optimizer = optimizer_mapper(optimizer)(learning_rate=0.01)
+    return create_fetch_ops(optimizer=optimizer, loss=loss_op, f_type=f_type)
 
-
-def mnist_model_cnn(features, target):
+@model_monitor
+def mnist_model_cnn(features, target, optimizer: str, f_type=''):
     x = tf.layers.conv2d(inputs=features, filters=30, kernel_size=(5, 5), activation=tf.nn.relu)
     x = tf.layers.max_pooling2d(inputs=x, pool_size=(2, 2), strides=(2, 2))
     x = tf.layers.conv2d(inputs=x, filters=15, kernel_size=(3, 3), activation=tf.nn.relu)
@@ -123,11 +126,9 @@ def mnist_model_cnn(features, target):
     x = tf.layers.dense(inputs=x, units=128, activation=tf.nn.relu)
     x = tf.layers.dense(inputs=x, units=50, activation=tf.nn.relu)
     x = tf.layers.dense(inputs=x, units=10, activation=tf.nn.softmax)
-    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-        logits=x, labels=target))
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
-    train_op = optimizer.minimize(loss_op)
-    return train_op, loss_op
+    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=x, labels=target))
+    optimizer = optimizer_mapper(optimizer)(learning_rate=0.01)
+    return create_fetch_ops(optimizer=optimizer, loss=loss_op, f_type=f_type)
 
 
 @model_monitor

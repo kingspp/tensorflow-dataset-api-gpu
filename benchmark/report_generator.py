@@ -50,18 +50,11 @@ class ConsolidatedReport(object):
         self.prefetch_to_device = config['prefetch_to_device']
         self.model_size_analytical = normal_run['model_analytical_memory']
         self.elapsed_time = humanize_time_delta(normal_profile['total_elapsed_time (secs)'])
-        if not config['session_config']['gpu_devices'] == '' and 'gpu_monitor' in normal_profile[
-            'device_statistics'] and not 'error' in normal_profile['device_statistics'][
-            'gpu_monitor']:
-            self.max_gpu_memory_consumption = \
-                normal_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
-                    GPU_DEVICES[config['session_config']['gpu_devices']]]
-            self.max_gpu_utilization = normal_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
-                GPU_DEVICES[config['session_config']['gpu_devices']]]
         self.max_cpu_utilization = normal_profile['device_statistics']['cpu_monitor']['max_cpu_usage (%)']
         self.max_memory_utilization = normal_profile['device_statistics']['memory_monitor']['max_memory_usage (MB)']
         self.activation_parameters = normal_run['activation_parameters']
         self.variable_parameters = normal_run['variable_parameters']
+        self.total_model_parameters = self.activation_parameters + self.variable_parameters
         self.generator_function_calls = normal_run['generator_function_calls']
 
         """
@@ -84,8 +77,6 @@ class ConsolidatedReport(object):
 
         if not config['session_config']['gpu_devices'] == '' and 'gpu_monitor' in normal_profile[
             'device_statistics'] and not 'error' in normal_profile['device_statistics']['gpu_monitor']:
-            self.gpu_stats = None
-
             # Normal Run
             self.total_gpu_memory = normal_profile['device_statistics']['gpu_monitor']['gpu_total_memory (in MiB)'][
                 GPU_DEVICES[config['session_config']['gpu_devices']]]
@@ -101,35 +92,23 @@ class ConsolidatedReport(object):
                     GPU_DEVICES[config['session_config']['gpu_devices']]]
 
             # Profiled Run
-            self.total_gpu_memory_profiled = \
-            profiled_profile['device_statistics']['gpu_monitor']['gpu_total_memory (in MiB)'][
-                GPU_DEVICES[config['session_config']['gpu_devices']]]
-            self.gpu_power_limit_profiled = \
-            profiled_profile['device_statistics']['gpu_monitor']['gpu_power_limit (in Watt)'][
-                GPU_DEVICES[config['session_config']['gpu_devices']]]
             self.max_gpu_memory_consumption_profiled = \
                 profiled_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
                     GPU_DEVICES[config['session_config']['gpu_devices']]]
             self.max_gpu_utilization_profiled = \
-            profiled_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
-                GPU_DEVICES[config['session_config']['gpu_devices']]]
+                profiled_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
+                    GPU_DEVICES[config['session_config']['gpu_devices']]]
             self.gpu_max_power_drawn_profiled = \
                 profiled_profile['device_statistics']['gpu_monitor']['gpu_max_power_drawn (in Watt)'][
                     GPU_DEVICES[config['session_config']['gpu_devices']]]
 
             # Separate Run
-            self.total_gpu_memory_separate = \
-            separate_profile['device_statistics']['gpu_monitor']['gpu_total_memory (in MiB)'][
-                GPU_DEVICES[config['session_config']['gpu_devices']]]
-            self.gpu_power_limit_separate = \
-            separate_profile['device_statistics']['gpu_monitor']['gpu_power_limit (in Watt)'][
-                GPU_DEVICES[config['session_config']['gpu_devices']]]
             self.max_gpu_memory_consumption_separate = \
                 separate_profile['device_statistics']['gpu_monitor']['gpu_max_memory_usage (in MiB)'][
                     GPU_DEVICES[config['session_config']['gpu_devices']]]
             self.max_gpu_utilization_separate = \
-            separate_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
-                GPU_DEVICES[config['session_config']['gpu_devices']]]
+                separate_profile['device_statistics']['gpu_monitor']['gpu_max_utilization (in %)'][
+                    GPU_DEVICES[config['session_config']['gpu_devices']]]
             self.gpu_max_power_drawn_separate = \
                 separate_profile['device_statistics']['gpu_monitor']['gpu_max_power_drawn (in Watt)'][
                     GPU_DEVICES[config['session_config']['gpu_devices']]]
