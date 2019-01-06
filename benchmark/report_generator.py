@@ -131,12 +131,11 @@ class ConsolidatedReport(object):
                     if its['name'] == 'MEMCPYDtoH' and its['cat'] == 'Op':
                         _memcpy_d2h_times.append(its['dur'])
 
-        self.average_iterator_get_next_time = mean(_iterator_get_next_times)
-
+        self.average_iterator_get_next_time = humanize_time_delta(mean(_iterator_get_next_times)/10**6)
         if 'gpu_monitor' in normal_profile['device_statistics'] and not 'error' in normal_profile['device_statistics'][
             'gpu_monitor']:
-            self.average_memcpyd2h_time = mean(_memcpy_d2h_times)
-            self.average_memcpyh2d_time = mean(_memcpy_h2d_times)
+            self.average_memcpyd2h_time = humanize_time_delta(mean(_memcpy_d2h_times)/10**6)
+            self.average_memcpyh2d_time = humanize_time_delta(mean(_memcpy_h2d_times)/10**6)
             self.total_memcpy_d2h_calls = len(_memcpy_d2h_times)
             self.total_memcpy_h2d_calls = len(_memcpy_h2d_times)
             self.memcpy_d2h_calls_per_step = len(_memcpy_d2h_times) / (config['epoch'] * config['steps'])
