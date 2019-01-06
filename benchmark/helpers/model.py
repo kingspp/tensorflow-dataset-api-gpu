@@ -64,9 +64,9 @@ def model_monitor(f, always: bool = False):
             r = f(*args, **kwargs)
             REPORT.model_end_time = time.time()
             REPORT.model_end_memory = REPORT.process.memory_info().rss // 10 ** 6
-            REPORT.variable_parameters = sum([reduce(operator.mul, t.get_shape().as_list()) for t in
+            REPORT.variable_parameters = sum([reduce(operator.mul, t.get_shape().as_list() if len(t.get_shape().as_list())>1 else [0]) for t in
                                               tf.get_default_graph().get_collection(
-                                                  tf.GraphKeys.VARIABLES)])
+                                                  tf.GraphKeys.GLOBAL_VARIABLES)])
             REPORT.model_analytical_memory += get_param_size(REPORT.activation_parameters) * 2
             REPORT.model_analytical_memory += get_param_size(REPORT.variable_parameters) * 3
             print('Model Created Successfully!')
